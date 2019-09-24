@@ -1,24 +1,44 @@
 "use strict";
 
-const getMoreQuotesButton = document.getElementById("getMoreQuotes");
-const chuckSays = document.getElementById("chuckSays");
-const chuckImage = document.getElementById("chuckImage");
-// Add an event listener to the button, DON'T FORGET TO PREVENT THE DEFAULT BEHAVIOR!
-// Call a function to return a new quote, and update the DOM
-getMoreQuotesButton.addEventListener("click", function(e) {
-    console.log("button clicked!");
-    updateChuckSays("dev");
-});
+const chuckQuotesForm = document.querySelector("#chuckQuotesForm")
+
+chuckQuotesForm.addEventListener("submit", function(event){
+    event.preventDefault();
+    const categoryValue = chuckQuotesForm.querySelector("select").value;
+    updateChuckSays(categoryValue);
+})
 
 // Create a function to update the quote text in the DOM
 function updateChuckSays(category) {
-    const chuckQuote = get(
-        `https://api.chucknorris.io/jokes/random?category=${category}`
-        );
+    const chuckSays = document.getElementById("chuckSays");
 
-    chuckQuote.then(function(quote){
-        chuckSays.innerHTML = quote.value;
-    });
+    get(`https://api.chucknorris.io/jokes/random?category=${category}`
+        ).then(response => {
+            chuckSays.innerHTML = response.value;
+        }
+    );
 }
+
+
+function getCategories(){
+    const selectWrapper = document.querySelector("#selectWrapper")
+    const categoryList = document.createElement("select");
+    get("https://api.chucknorris.io/jokes/categories").then(function(response){
+        response.forEach(function(category){
+            const categoryOption = document.createElement("option")
+            categoryOption.text = category;
+            categoryOption.value = category;
+            categoryList.append(categoryOption);
+        });
+    });
+    selectWrapper.append(categoryList);
+}
+
+//create an immediately invoked function expression (IFFY)
+(function(){
+    const defaultCategory = "dev"
+    updateChuckSays(defaultCategory)
+    getCategories()
+})();
 
 updateChuckSays("food");
